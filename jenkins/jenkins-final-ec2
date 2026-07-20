@@ -10,7 +10,7 @@ pipeline {
 
         stage('SCM') {
             steps {
-                git branch: 'main', url: 'https://github.com/CloudTechDevOps/Java-springboot-project.git'
+                git branch: 'main', url: 'https://github.com/jayeshzimbal/Java-springboot-project.git'
             }
         }
 
