@@ -18,7 +18,7 @@ pipeline {
             when { expression { params.Action == 'create' } }
             steps {
                 gitCheckout(
-                    branch: "master",
+                    branch: "main",
                     url: "https://github.com/jayeshzimbal/Java-springboot-project.git"
                 )
             }
