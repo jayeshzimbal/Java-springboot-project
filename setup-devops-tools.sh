@@ -1,166 +1,89 @@
 #!/bin/bash
 
 set -e
+set -x
+set -o pipefail
 
-echo "================================="
-echo "Updating System"
-echo "================================="
+echo "========================================"
+echo " Updating System"
+echo "========================================"
+sudo dnf update -y
 
-sudo yum update -y || sudo dnf update -y
+echo "========================================"
+echo " Installing Git"
+echo "========================================"
+sudo dnf install -y git
 
+echo "========================================"
+echo " Installing Java 21"
+echo "========================================"
+sudo dnf install -y java-21-amazon-corretto-devel
 
-echo "================================="
-echo "Installing Basic Tools"
-echo "================================="
+echo "========================================"
+echo " Installing Maven"
+echo "========================================"
+sudo dnf install -y maven
 
-sudo yum install -y \
-git \
-curl \
-wget \
-unzip \
-zip \
-jq \
-tree \
-vim \
-nano \
-tar \
-gzip \
-which \
-java-17-amazon-corretto-devel || \
-sudo dnf install -y \
-git \
-curl \
-wget \
-unzip \
-zip \
-jq \
-tree \
-vim \
-nano \
-tar \
-gzip \
-which \
-java-17-amazon-corretto-devel
-
-
-echo "================================="
-echo "Installing Docker"
-echo "================================="
-
-sudo yum install docker -y || sudo dnf install docker -y
+echo "========================================"
+echo " Installing Docker"
+echo "========================================"
+sudo dnf install -y docker
 
 sudo systemctl enable docker
 sudo systemctl start docker
 
 sudo usermod -aG docker ec2-user
+sudo usermod -aG docker jenkins || true
 
+echo "========================================"
+echo " Installing Docker Compose v2"
+echo "========================================"
 
-echo "================================="
-echo "Installing Docker Compose"
-echo "================================="
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+mkdir -p $DOCKER_CONFIG/cli-plugins
 
-sudo curl -L \
-https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
--o /usr/local/bin/docker-compose
+curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+-o $DOCKER_CONFIG/cli-plugins/docker-compose
 
-sudo chmod +x /usr/local/bin/docker-compose
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 
+echo "========================================"
+echo " Installing Docker Buildx"
+echo "========================================"
 
-echo "================================="
-echo "Installing AWS CLI"
-echo "================================="
+curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-linux-amd64 \
+-o $DOCKER_CONFIG/cli-plugins/docker-buildx
 
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
--o awscliv2.zip
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-buildx
 
-unzip -o awscliv2.zip
+echo "========================================"
+echo " Installing Jenkins"
+echo "========================================"
 
-sudo ./aws/install
-
-rm -rf aws awscliv2.zip
-
-
-echo "================================="
-echo "Installing kubectl"
-echo "================================="
-
-curl -LO \
-"https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-
-chmod +x kubectl
-
-sudo mv kubectl /usr/local/bin/
-
-
-echo "================================="
-echo "Installing eksctl"
-echo "================================="
-
-ARCH=amd64
-
-curl --silent --location \
-"https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_${ARCH}.tar.gz" \
-| tar xz -C /tmp
-
-sudo mv /tmp/eksctl /usr/local/bin/
-
-
-echo "================================="
-echo "Installing Terraform"
-echo "================================="
-
-sudo yum install -y yum-utils || sudo dnf install -y yum-utils
-
-sudo yum-config-manager \
---add-repo \
-https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo || true
-
-sudo dnf install terraform -y || sudo yum install terraform -y
-
-
-echo "================================="
-echo "Installing Helm"
-echo "================================="
-
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-
-echo "================================="
-echo "Installing Jenkins"
-echo "================================="
-
-sudo wget \
--O /etc/yum.repos.d/jenkins.repo \
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
 https://pkg.jenkins.io/redhat-stable/jenkins.repo
-
 
 sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
 
-
-sudo yum install jenkins -y || sudo dnf install jenkins -y
-
+sudo dnf install -y jenkins
 
 sudo systemctl enable jenkins
 sudo systemctl start jenkins
 
-
-echo "================================="
-echo "Versions"
-echo "================================="
+echo "========================================"
+echo " Versions"
+echo "========================================"
 
 git --version
 java -version
+mvn -version
 docker --version
-docker-compose --version
-aws --version
-kubectl version --client
-eksctl version
-terraform version
-helm version
-jenkins --version
+docker compose version
+docker buildx version
 
+echo "========================================"
+echo " Installation Complete"
+echo "========================================"
 
-echo "================================="
-echo "SETUP COMPLETED"
-echo "Logout and login again for docker permission"
-echo "================================="
+echo "Jenkins Password:"
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword
