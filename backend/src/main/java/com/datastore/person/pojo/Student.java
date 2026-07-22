@@ -2,14 +2,15 @@ package com.datastore.person.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Student {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -32,14 +33,16 @@ public class Student {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
-        this.name=name;
+        this.name = name;
     }
 
     public int getAge() {
         return age;
     }
+
     public void setAge(int age) {
-        this.age=age;
+        this.age = age;
     }
 }
