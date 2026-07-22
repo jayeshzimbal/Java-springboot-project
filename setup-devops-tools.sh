@@ -1,5 +1,16 @@
 #!/bin/bash
 
+######### jenkins plugins ###########
+# git 
+# pipeline
+# docker pipeline
+# ssh agent 
+# credentials binding 
+# workspace cleanup
+# pipeline stage view 
+
+##################################
+
 set -e
 set -x
 set -o pipefail
